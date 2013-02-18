@@ -11,7 +11,7 @@ namespace Jaws.Data
     /// <typeparam name="T"></typeparam>
     public class CircularQuadtree<T> : IEnumerable<T> where T: IQuadNode
     {
-        protected List<T> nodes;
+        protected Dictionary<T, CircularQuadNode> nodes;
 
         /// <summary>
         /// Creates a new CircularQuadTree
@@ -72,12 +72,34 @@ namespace Jaws.Data
 
         public IEnumerator<T> GetEnumerator()
         {
-            return nodes.GetEnumerator();
+            return nodes.Keys.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return nodes.GetEnumerator();
+            return nodes.Keys.GetEnumerator();
+        }
+
+        protected class CircularQuadNode
+        {
+            public int Depth { get; set; }
+
+            public CircularQuadNode NeighbourUp { get; set; }
+            public CircularQuadNode NeighbourRight { get; set; }
+            public CircularQuadNode NeighbourDown { get; set; }
+            public CircularQuadNode NeighbourLeft { get; set; }
+
+            public T Value { get; set; }
+
+            public CircularQuadNode ChildTopLeft { get; set; }
+            public CircularQuadNode ChildTopRight { get; set; }
+            public CircularQuadNode ChildBottomRight { get; set; }
+            public CircularQuadNode ChildBottomLeft { get; set; }
+
+            public bool IsLeaf()
+            {
+                return ChildTopLeft == null && ChildTopRight == null && ChildBottomRight == null && ChildBottomLeft == null;
+            }
         }
     }
 }
