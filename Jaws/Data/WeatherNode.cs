@@ -30,32 +30,45 @@ namespace Jaws.Data
         * 
     */
     /// </summary>
-    public class WeatherNode : IQuadNode, ICloneable
+    public class WeatherNode : IQuadNode, ICloneable, IEnumerable<WeatherLayer>
     {
         /// <summary>
-        /// The current temperature in Kelvin
+        /// Layers with weather in this air column
         /// </summary>
-        public Single Temperature { get; set; }
+        public List<WeatherLayer> Layers { get; set; }
 
         /// <summary>
-        /// The current Humidity in Saturation percentage
+        /// The ground temperature in Kelvin
         /// </summary>
-        public Single Humidity { get; set; }
+        public Single Temperature { get { return this.Layers[0].Temperature; } }
 
         /// <summary>
-        /// The current Airpressure in hectoPascal (hPa/millibar)
+        /// The ground Humidity in Saturation percentage
         /// </summary>
-        public Single Pressure { get; set; }
+        public Single Humidity { get { return this.Layers[0].Humidity; } } 
 
         /// <summary>
-        /// The current precipitation (Weather by Water Vapour)
+        /// The ground Airpressure in hectoPascal (hPa/millibar)
         /// </summary>
-        public ICloneable Precipitation { get; set; }
+        public Single Pressure { get { return this.Layers[0].Pressure; } }
+
+        /// <summary>
+        /// The area of this air column
+        /// </summary>
+        public Single Area { get; protected set; }
+
+        /// <summary>
+        /// The ground precipitation (Weather by Water Vapour)
+        /// </summary>
+        public PrecipitationType Precipitation { get { return this.Layers[0].Precipitation; } }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        protected WeatherNode() { }
+        protected WeatherNode() 
+        {
+            this.Layers = new List<WeatherLayer>();
+        }
 
         /// <summary>
         /// Generates a weathernode
@@ -63,10 +76,19 @@ namespace Jaws.Data
         /// <param name="temperature">Temperature in Kelvin</param>
         /// <param name="humidity">Humidity in percentage</param>
         /// <param name="pressure">Air Pressure in hectoPascal</param>
+        /// <param name="precipitation">Precipitation type</param>
         /// <returns>The generated weathernode</returns>
-        public static WeatherNode Generate(Single temperature, Single humidity, Single pressure)
+        public static WeatherNode Generate(Single area, Single temperature = 0, Single humidity = 0, Single pressure = 1305, PrecipitationType precipitation = PrecipitationType.None )
         {
-            return new WeatherNode() { Temperature = temperature, Humidity = humidity, Pressure = pressure };
+            var node = new WeatherNode() { Area = area };
+
+            // Ground Layer
+            node.Layers.Add(WeatherLayer.Generate(temperature, humidity, pressure, precipitation));
+
+            // TODO top layers
+            // which are derived from ground layer
+
+            return node;
         }
 
         /// <summary>
@@ -75,31 +97,94 @@ namespace Jaws.Data
         /// <returns></returns>
         public Tuple<IQuadNode, IQuadNode, IQuadNode, IQuadNode> Split()
         {
-            return new Tuple<IQuadNode, IQuadNode, IQuadNode, IQuadNode>(DeepClone(), DeepClone(), DeepClone(), DeepClone());
+            var topleft = DeepClone();
+            var topright = DeepClone();
+            var bottomright = DeepClone();
+            var bottomleft = DeepClone();
+
+            topleft.Area = this.Area / 4;
+            topright.Area = this.Area / 4;
+            bottomright.Area = this.Area / 4;
+            bottomleft.Area = this.Area / 4;
+
+            return new Tuple<IQuadNode, IQuadNode, IQuadNode, IQuadNode>(topleft, topright, bottomright, bottomleft);
         }
 
         /// <summary>
         /// Returns a deepclone of this object
         /// </summary>
-        /// <returns></returns>
+        /// <returns>the clone</returns>
         public WeatherNode DeepClone()
         {
-            return new WeatherNode()
+            var node = new WeatherNode();
+            node.Area = this.Area;
+            foreach (var layer in this.Layers)
+                node.Layers.Add(layer.DeepClone());
+            return node;
+        }
+
+        /// <summary>
+        /// Clones the Object
+        /// </summary>
+        /// <returns>the clone</returns>
+        Object ICloneable.Clone()
+        {
+            return DeepClone();
+        }
+
+        /// <summary>
+        /// Gets the enumerator for this node
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<WeatherLayer> GetEnumerator()
+        {
+            return this.Layers.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Gets the enumerator for this object
+        /// </summary>
+        /// <returns></returns>
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            var that = obj as WeatherNode;
+            if (that == null)
+                return false;
+
+            var that_enumerator = that.GetEnumerator();
+            var that_has = that_enumerator.MoveNext();
+            foreach (var layer in this)
             {
-                Temperature = this.Temperature,
-                Humidity = this.Humidity,
-                Precipitation = this.Precipitation.Clone() as ICloneable,
-                Pressure = this.Pressure
-            };
+                if (!that_has)
+                    return false;
+                if (!layer.Equals(that_enumerator.Current))
+                    return false;
+                that_has = that_enumerator.MoveNext();
+            }
+
+            if (that_has)
+                return false;
+
+            return this.Area == that.Area;
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        Object ICloneable.Clone()
+        public override int GetHashCode()
         {
-            return DeepClone();
+            return base.GetHashCode();
         }
     }
 }
