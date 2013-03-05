@@ -62,7 +62,7 @@ namespace Jaws.Data
         /// </summary>
         /// <param name="temperature">Temperature in Kelvin</param>
         /// <param name="humidity">Humidity in percentage</param>
-        /// <param name="pressure">Air Pressure in bar</param>
+        /// <param name="pressure">Air Pressure in hectoPascal</param>
         /// <returns>The generated weathernode</returns>
         public static WeatherNode Generate(Single temperature, Single humidity, Single pressure)
         {
