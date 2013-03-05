@@ -61,24 +61,68 @@ namespace Jaws.Data
             f6.NeighbourRight = f4;
         }
 
-        public List<T> GetNeighboursUp(T node)
+        public IEnumerable<T> GetNeighboursUp(T node)
         {
-            return null;
+            var parent = nodes[node];
+            return GetBottomNodes(parent.NeighbourUp).Select((n) => n.Value).Where((n) => n != null);
         }
 
-        public List<T> GetNeighboursRight(T node)
+        public IEnumerable<T> GetNeighboursRight(T node)
         {
-            return null;
+            var parent = nodes[node];
+            return GetRightNodes(parent.NeighbourRight).Select((n) => n.Value).Where((n) => n != null);
         }
 
-        public List<T> GetNeighboursDown(T node)
+        public IEnumerable<T> GetNeighboursDown(T node)
         {
-            return null;
+            var parent = nodes[node];
+            return GetBottomNodes(parent.NeighbourDown).Select((n) => n.Value).Where((n) => n != null);
         }
 
-        public List<T> GetNeighboursLeft(T node)
+        public IEnumerable<T> GetNeighboursLeft(T node)
         {
-            return null;
+            var parent = nodes[node];
+            return GetLeftNodes(parent.NeighbourLeft).Select((n) => n.Value).Where((n) => n != null);
+        }
+
+        protected IEnumerable<CircularQuadNode> GetLeftNodes(CircularQuadNode node)
+        {
+            if (node == null)
+                return new CircularQuadNode[] { };
+
+            return new CircularQuadNode[] { node }
+                .Concat(GetLeftNodes(node.ChildTopLeft))
+                .Concat(GetLeftNodes(node.ChildBottomLeft));
+        }
+
+        protected IEnumerable<CircularQuadNode> GetRightNodes(CircularQuadNode node)
+        {
+            if (node == null)
+                return new CircularQuadNode[] { };
+
+            return new CircularQuadNode[] { node }
+                .Concat(GetRightNodes(node.ChildTopRight))
+                .Concat(GetRightNodes(node.ChildBottomRight));
+        }
+
+        protected IEnumerable<CircularQuadNode> GetTopNodes(CircularQuadNode node)
+        {
+            if (node == null)
+                return new CircularQuadNode[] { };
+
+            return new CircularQuadNode[] { node }
+                .Concat(GetTopNodes(node.ChildTopLeft))
+                .Concat(GetTopNodes(node.ChildTopRight));
+        }
+
+        protected IEnumerable<CircularQuadNode> GetBottomNodes(CircularQuadNode node)
+        {
+            if (node == null)
+                return new CircularQuadNode[] { };
+
+            return new CircularQuadNode[] { node }
+                .Concat(GetBottomNodes(node.ChildBottomLeft))
+                .Concat(GetBottomNodes(node.ChildBottomRight));
         }
 
         /// <summary>
@@ -87,7 +131,8 @@ namespace Jaws.Data
         /// <param name="node">The node to split</param>
         public void Split(T node)
         {
-
+            var parent = nodes[node];
+            int newdepth = parent.Depth + 1;
         }
 
         public IEnumerable<T> GetArea(T child, int depth)
@@ -99,19 +144,24 @@ namespace Jaws.Data
             while (node.Depth > depth)
                 node = node.Parent;
 
-            return GetArea(node, depth);
+            return GetArea(node);
         }
 
-        protected IEnumerable<T> GetArea(CircularQuadNode node, int depth)
+        protected IEnumerable<T> GetArea(CircularQuadNode node)
         {
-            if(node == null)
-                return new T[]{};
+            return GetChildren(node).Select((n) => n.Value).Where((n) => n != null);
+        }
 
-            return new T[] { node.Value }
-                .Concat(GetArea(node.NeighbourUp, depth + 1))
-                .Concat(GetArea(node.NeighbourRight, depth + 1))
-                .Concat(GetArea(node.NeighbourDown, depth + 1))
-                .Concat(GetArea(node.NeighbourLeft, depth + 1));
+        protected IEnumerable<CircularQuadNode> GetChildren(CircularQuadNode node)
+        {
+            if (node == null)
+                return new CircularQuadNode[] { };
+
+            return new CircularQuadNode[] { node }
+                .Concat(GetChildren(node.ChildTopRight))
+                .Concat(GetChildren(node.ChildBottomRight))
+                .Concat(GetChildren(node.ChildBottomLeft))
+                .Concat(GetChildren(node.ChildTopLeft));
         }
         
         /// <summary>
@@ -143,7 +193,7 @@ namespace Jaws.Data
         /// <returns>Zero based depth</returns>
         public int GetDepth(T node)
         {
-            return 0;
+            return nodes[node].Depth;
         }
 
         public IEnumerator<T> GetEnumerator()
