@@ -13,7 +13,7 @@ namespace Test
         [TestMethod]
         public void TestGenerate()
         {
-            var layer = WeatherLayer.Generate(12, 55, 1305, PrecipitationType.Rain);
+            var layer = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 55, 1035, PrecipitationType.Rain);
             Assert.IsInstanceOfType(layer, typeof(WeatherLayer), "WeatherLayer was not generated");
         }
 
@@ -23,8 +23,8 @@ namespace Test
         [TestMethod]
         public void TestTemperature()
         {
-            var layerA = WeatherLayer.Generate(0, 0, 0, PrecipitationType.None);
-            var layerB = WeatherLayer.Generate(2.5f, 0, 0, PrecipitationType.None);
+            var layerA = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 0, 0, PrecipitationType.None);
+            var layerB = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 2.5f, 0, 0, PrecipitationType.None);
 
             Assert.AreEqual(0, layerA.Temperature, "temperature was not correctly set");
             Assert.AreEqual(2.5f, layerB.Temperature, "temperature was not correctly set");
@@ -36,8 +36,8 @@ namespace Test
         [TestMethod]
         public void TestHumidity()
         {
-            var layerA = WeatherLayer.Generate(0, 0, 0, PrecipitationType.None);
-            var layerB = WeatherLayer.Generate(0, 2.5f, 0, PrecipitationType.None);
+            var layerA = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 0, 0, PrecipitationType.None);
+            var layerB = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 2.5f, 0, PrecipitationType.None);
 
             Assert.AreEqual(0, layerA.Humidity, "humidity was not correctly set");
             Assert.AreEqual(2.5f, layerB.Humidity, "humidity was not correctly set");
@@ -49,8 +49,8 @@ namespace Test
         [TestMethod]
         public void TestPressure()
         {
-            var layerA = WeatherLayer.Generate(0, 0, 0, PrecipitationType.None);
-            var layerB = WeatherLayer.Generate(0, 0, 2.5f, PrecipitationType.None);
+            var layerA = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 0, 0, PrecipitationType.None);
+            var layerB = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 0, 2.5f, PrecipitationType.None);
 
             Assert.AreEqual(0, layerA.Pressure, "pressure was not correctly set");
             Assert.AreEqual(2.5f, layerB.Pressure, "pressure was not correctly set");
@@ -62,8 +62,8 @@ namespace Test
         [TestMethod]
         public void TestPrecipitation()
         {
-            var layerA = WeatherLayer.Generate(0, 0, 0, PrecipitationType.None);
-            var layerB = WeatherLayer.Generate(0, 0, 0, PrecipitationType.Rain);
+            var layerA = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 0, 0, PrecipitationType.None);
+            var layerB = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 0, 0, PrecipitationType.Rain);
 
             Assert.AreEqual(PrecipitationType.None, layerA.Precipitation, "precipitation was not correctly set");
             Assert.AreEqual(PrecipitationType.Rain, layerB.Precipitation, "precipitation was not correctly set");
@@ -75,7 +75,7 @@ namespace Test
         [TestMethod]
         public void TestDeepClone()
         {
-            var parent = WeatherLayer.Generate(12, 55, 1305, PrecipitationType.Rain);
+            var parent = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 55, 1035, PrecipitationType.Rain);
             var clone = parent.DeepClone();
 
             Assert.AreNotSame(parent, clone);
@@ -93,7 +93,7 @@ namespace Test
         [TestMethod]
         public void TestClone()
         {
-            var layer = WeatherLayer.Generate(12, 55, 1305, PrecipitationType.Rain);
+            var layer = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 55, 1035, PrecipitationType.Rain);
             Assert.AreEqual(layer.DeepClone(), ((ICloneable)layer).Clone());
         }
 
@@ -103,13 +103,13 @@ namespace Test
         [TestMethod]
         public void TestEquals()
         {
-            var layerA = WeatherLayer.Generate(12, 55, 1305, PrecipitationType.Rain);
-            var layerB = WeatherLayer.Generate(12, 55, 1305, PrecipitationType.Rain);
-            var layerC = WeatherLayer.Generate(0, 0, 0, PrecipitationType.None);
-            var layerD = WeatherLayer.Generate(0, 55, 1305, PrecipitationType.Rain);
-            var layerE = WeatherLayer.Generate(12, 0, 1305, PrecipitationType.Rain);
-            var layerF = WeatherLayer.Generate(12, 55, 0, PrecipitationType.Rain);
-            var layerG = WeatherLayer.Generate(12, 55, 1305, PrecipitationType.None);
+            var layerA = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 55, 1035, PrecipitationType.Rain);
+            var layerB = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 55, 1035, PrecipitationType.Rain);
+            var layerC = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 0, 0, PrecipitationType.None);
+            var layerD = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 55, 1035, PrecipitationType.Rain);
+            var layerE = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 0, 1035, PrecipitationType.Rain);
+            var layerF = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 55, 0, PrecipitationType.Rain);
+            var layerG = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 55, 1035, PrecipitationType.None);
             var cloneA = layerA.DeepClone();
 
             Assert.IsFalse(layerA.Equals(null));
@@ -136,9 +136,9 @@ namespace Test
         [TestMethod]
         public void TestGetHashCode()
         {
-            var layerA = WeatherLayer.Generate(12, 55, 1305, PrecipitationType.Rain);
-            var layerB = WeatherLayer.Generate(12, 55, 1305, PrecipitationType.Rain);
-            var layerC = WeatherLayer.Generate(0, 0, 0, PrecipitationType.None);
+            var layerA = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 55, 1035, PrecipitationType.Rain);
+            var layerB = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 12, 55, 1035, PrecipitationType.Rain);
+            var layerC = WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 0, 0, 0, PrecipitationType.None);
             var layerD = layerA;
             var cloneA = layerA.DeepClone();
 

@@ -28,6 +28,11 @@ namespace Jaws.Data
         public PrecipitationType Precipitation { get; set; }
 
         /// <summary>
+        /// Layer Height
+        /// </summary>
+        public Single Height { get; protected set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         protected WeatherLayer()
@@ -43,10 +48,11 @@ namespace Jaws.Data
         /// <param name="pressure">Air pressure in hectoPascal</param>
         /// <param name="precipitation"></param>
         /// <returns>The weather layer</returns>
-        public static WeatherLayer Generate( Single temperature, Single humidity, Single pressure, PrecipitationType precipitation)
+        public static WeatherLayer Generate( Single height, Single temperature, Single humidity, Single pressure, PrecipitationType precipitation)
         {
             return new WeatherLayer()
             {
+                Height = height,
                 Temperature = temperature,
                 Humidity = humidity,
                 Precipitation = precipitation,
@@ -60,7 +66,7 @@ namespace Jaws.Data
         /// <returns></returns>
         public WeatherLayer DeepClone()
         {
-            return WeatherLayer.Generate(this.Temperature, this.Humidity, this.Pressure, this.Precipitation);
+            return WeatherLayer.Generate( this.Height, this.Temperature, this.Humidity, this.Pressure, this.Precipitation );
         }
 
         /// <summary>
@@ -83,7 +89,8 @@ namespace Jaws.Data
             if (that == null)
                 return false;
 
-            return that.Temperature == this.Temperature &&
+            return that.Height == this.Height &&
+                that.Temperature == this.Temperature &&
                 that.Humidity == this.Humidity &&
                 that.Precipitation == this.Precipitation &&
                 that.Pressure == this.Pressure;
@@ -95,7 +102,8 @@ namespace Jaws.Data
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return (this.Temperature.GetHashCode() * 127) ^
+            return (this.Height.GetHashCode() * 29 ) ^
+                (this.Temperature.GetHashCode() * 127) ^
                 (this.Humidity.GetHashCode() * 251) ^
                 (this.Pressure.GetHashCode() * 83) ^
                 (this.Precipitation.GetHashCode() * 17);

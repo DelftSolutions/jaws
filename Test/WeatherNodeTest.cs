@@ -176,7 +176,7 @@ namespace Test
             var nodeE = nodeA.DeepClone();
             var nodeF = nodeA.DeepClone();
             nodeD.Layers[0].Temperature = 1;
-            nodeE.Layers.Add(WeatherLayer.Generate(1, 0, 0, PrecipitationType.None));
+            nodeE.Layers.Add(WeatherLayer.Generate(WeatherNode.GroundLayerHeight, 1, 0, 0, PrecipitationType.None));
             nodeF.Layers.RemoveAt(0);
 
             Assert.IsFalse(nodeA.Equals(nodeD));
@@ -193,8 +193,8 @@ namespace Test
         [TestMethod]
         public void TestGetHashCode()
         {
-            var nodeA = WeatherNode.Generate(1, 12, 55, 1305, PrecipitationType.Rain);
-            var nodeB = WeatherNode.Generate(1, 12, 55, 1305, PrecipitationType.Rain);
+            var nodeA = WeatherNode.Generate(1, 12, 55, 1035, PrecipitationType.Rain);
+            var nodeB = WeatherNode.Generate(1, 12, 55, 1035, PrecipitationType.Rain);
             var nodeC = WeatherNode.Generate(1, 0, 0, 0, PrecipitationType.None);
             var nodeD = nodeA;
             var cloneA = nodeA.DeepClone();

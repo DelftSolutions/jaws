@@ -8,19 +8,21 @@ namespace Jaws.Generators
 {
     public class WorldGenerator
     {
+        const Int32 WorldFaceSize = 4 ^ 7;
+
         /// <summary>
         /// Generates a new world with 6 faces
         /// </summary>
         /// <returns></returns>
         public static CircularQuadTree<WeatherNode> Generate()
         {
-            return new CircularQuadTree<WeatherNode>( 
-                WeatherNode.Generate( 0, 0, 1035 ),
-                WeatherNode.Generate( 0, 0, 1035 ),
-                WeatherNode.Generate( 0, 0, 1035 ),
-                WeatherNode.Generate( 0, 0, 1035 ),
-                WeatherNode.Generate( 0, 0, 1035 ),
-                WeatherNode.Generate( 0, 0, 1035 )
+            return new CircularQuadTree<WeatherNode>(
+                WeatherNode.Generate(WorldGenerator.WorldFaceSize),
+                WeatherNode.Generate(WorldGenerator.WorldFaceSize),
+                WeatherNode.Generate(WorldGenerator.WorldFaceSize),
+                WeatherNode.Generate(WorldGenerator.WorldFaceSize),
+                WeatherNode.Generate(WorldGenerator.WorldFaceSize),
+                WeatherNode.Generate(WorldGenerator.WorldFaceSize)
             );
         } 
     }
