@@ -137,6 +137,11 @@ namespace Jaws.Data
 
         public IEnumerable<T> GetArea(T child, int depth)
         {
+            return GetArea(GetParent(child, depth));
+        }
+
+        protected CircularQuadNode GetParent(T child, int depth)
+        {
             CircularQuadNode node = nodes[child];
             if (node.Depth < depth)
                 throw new ArgumentOutOfRangeException("Depth is lower than child depth");
@@ -144,7 +149,7 @@ namespace Jaws.Data
             while (node.Depth > depth)
                 node = node.Parent;
 
-            return GetArea(node);
+            return node;
         }
 
         protected IEnumerable<T> GetArea(CircularQuadNode node)
@@ -163,18 +168,6 @@ namespace Jaws.Data
                 .Concat(GetChildren(node.ChildBottomLeft))
                 .Concat(GetChildren(node.ChildTopLeft));
         }
-        
-        /// <summary>
-        /// Merges the parents of <paramref name="child"/> until depth <paramref name="untilDepth"/> and replaces it with <paramref name="replacement"/>
-        /// </summary>
-        /// <param name="child">The child node to find</param>
-        /// <param name="untilDepth">The depth to merge to</param>
-        /// <param name="replacement">The node to replace it with</param>
-        /// <returns>The list of merged nodes</returns>
-        public List<T> Merge(T child, int untilDepth, T replacement)
-        {
-            return null;
-        }
 
         /// <summary>
         /// Replaces <paramref name="node"/> with <paramref name="replacement"/>
@@ -183,7 +176,56 @@ namespace Jaws.Data
         /// <param name="replacement">The node that replaces the found node</param>
         public void Replace(T node, int depth, T replacement)
         {
+            var parent = GetParent(node, depth);
 
+            //Skip first node (parent)
+            var deleted = GetChildren(parent).Skip(1);
+
+            //Remove all references to soon to be deleted nodes
+            var leftNeighbours = GetRightNodes(parent.NeighbourLeft).Skip(1);
+            leftNeighbours.AsParallel().ForAll((n) => ReplaceRightReference(n, deleted, parent));
+
+            var rightNeighbours = GetLeftNodes(parent.NeighbourRight).Skip(1);
+            rightNeighbours.AsParallel().ForAll((n) => ReplaceLeftReference(n, deleted, parent));
+
+            var topNeighbours = GetBottomNodes(parent.NeighbourUp).Skip(1);
+            topNeighbours.AsParallel().ForAll((n) => ReplaceDownReference(n, deleted, parent));
+
+            var bottomNeighbours = GetTopNodes(parent.NeighbourDown).Skip(1);
+            bottomNeighbours.AsParallel().ForAll((n) => ReplaceUpReference(n, deleted, parent));
+
+            //Remove children
+            parent.ChildBottomLeft = null;
+            parent.ChildBottomRight = null;
+            parent.ChildTopLeft = null;
+            parent.ChildTopRight = null;
+
+            foreach (var child in deleted)
+                nodes.Remove(child.Value);
+        }
+
+        protected void ReplaceLeftReference(CircularQuadNode node, IEnumerable<CircularQuadNode> subjects, CircularQuadNode replacement)
+        {
+            if (subjects.Where((s) => node.NeighbourLeft == s).Any())
+                node.NeighbourLeft = replacement;
+        }
+
+        protected void ReplaceDownReference(CircularQuadNode node, IEnumerable<CircularQuadNode> subjects, CircularQuadNode replacement)
+        {
+            if (subjects.Where((s) => node.NeighbourDown == s).Any())
+                node.NeighbourDown = replacement;
+        }
+
+        protected void ReplaceRightReference(CircularQuadNode node, IEnumerable<CircularQuadNode> subjects, CircularQuadNode replacement)
+        {
+            if (subjects.Where((s) => node.NeighbourRight == s).Any())
+                node.NeighbourRight = replacement;
+        }
+
+        protected void ReplaceUpReference(CircularQuadNode node, IEnumerable<CircularQuadNode> subjects, CircularQuadNode replacement)
+        {
+            if (subjects.Where((s) => node.NeighbourUp == s).Any())
+                node.NeighbourUp = replacement;
         }
 
         /// <summary>
