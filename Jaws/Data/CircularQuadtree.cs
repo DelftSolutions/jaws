@@ -18,6 +18,8 @@ namespace Jaws.Data
         /// </summary>
         public CircularQuadTree(T face1, T face2, T face3, T face4, T face5, T face6)
         {
+            nodes = new Dictionary<T, CircularQuadNode>();
+
             var f1 = new CircularQuadNode();
             var f2 = new CircularQuadNode();
             var f3 = new CircularQuadNode();
@@ -59,6 +61,13 @@ namespace Jaws.Data
             f4.NeighbourRight = f6;
             f5.NeighbourRight = f4;
             f6.NeighbourRight = f4;
+
+            nodes.Add(f1.Value, f1);
+            nodes.Add(f2.Value, f2);
+            nodes.Add(f3.Value, f3);
+            nodes.Add(f4.Value, f4);
+            nodes.Add(f5.Value, f5);
+            nodes.Add(f6.Value, f6);
         }
 
         public IEnumerable<T> GetNeighboursUp(T node)
