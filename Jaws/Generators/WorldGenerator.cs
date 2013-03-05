@@ -8,7 +8,7 @@ namespace Jaws.Generators
 {
     public class WorldGenerator
     {
-        public static CircularQuadTree<Object> Generate()
+        public static CircularQuadTree<WeatherNode> Generate()
         {
             return null;
         } 

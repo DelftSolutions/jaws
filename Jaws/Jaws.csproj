@@ -42,6 +42,8 @@
   <ItemGroup>
     <Compile Include="Data\CircularQuadtree.cs" />
     <Compile Include="Data\IQuadNode.cs" />
+    <Compile Include="Data\WeatherNode.cs" />
+    <Compile Include="Generators\WorldGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
