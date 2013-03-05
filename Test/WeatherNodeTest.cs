@@ -8,7 +8,7 @@ namespace Test
     public class WeatherNodeTest
     {
         /// <summary>
-        /// 
+        /// Tests generation of nodes
         /// </summary>
         [TestMethod]
         public void TestGenerate()
@@ -18,7 +18,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Tests the ground temperature
         /// </summary>
         [TestMethod]
         public void TestTemperature()
@@ -31,7 +31,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Tests the ground humidity
         /// </summary>
         [TestMethod]
         public void TestHumidity()
@@ -44,7 +44,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Tests the ground pressure
         /// </summary>
         [TestMethod]
         public void TestPressure()
@@ -57,7 +57,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Tests the ground precipitation
         /// </summary>
         [TestMethod]
         public void TestPrecipitation()
@@ -70,7 +70,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Tests splitting the node
         /// </summary>
         [TestMethod]
         public void TestSplit()
@@ -107,7 +107,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Tests deepcloning the node
         /// </summary>
         [TestMethod]
         public void TestDeepClone()
@@ -131,7 +131,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Tests cloning the node
         /// </summary>
         [TestMethod]
         public void TestClone()
@@ -141,7 +141,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Tests Enumerable methods
         /// </summary>
         [TestMethod]
         public void TestGetEnumerator()
@@ -153,7 +153,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Equality tests
         /// </summary>
         [TestMethod]
         public void TestEquals()
@@ -188,7 +188,7 @@ namespace Test
         }
 
         /// <summary>
-        /// 
+        /// Tests hashcodes
         /// </summary>
         [TestMethod]
         public void TestGetHashCode()
@@ -199,10 +199,10 @@ namespace Test
             var nodeD = nodeA;
             var cloneA = nodeA.DeepClone();
 
-            Assert.AreNotEqual(nodeA.GetHashCode(), nodeB.GetHashCode());
+            Assert.AreEqual(nodeA.GetHashCode(), nodeB.GetHashCode());
             Assert.AreNotEqual(nodeA.GetHashCode(), nodeC.GetHashCode());
             Assert.AreEqual(nodeA.GetHashCode(), nodeD.GetHashCode());
-            Assert.AreNotEqual(nodeA.GetHashCode(), cloneA.GetHashCode());
+            Assert.AreEqual(nodeA.GetHashCode(), cloneA.GetHashCode());
         }
     }
 }

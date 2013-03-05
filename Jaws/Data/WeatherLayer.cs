@@ -90,12 +90,15 @@ namespace Jaws.Data
         }
 
         /// <summary>
-        /// 
+        /// Gets the hash code
         /// </summary>
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return (this.Temperature.GetHashCode() * 127) ^
+                (this.Humidity.GetHashCode() * 251) ^
+                (this.Pressure.GetHashCode() * 83) ^
+                (this.Precipitation.GetHashCode() * 17);
         }
     }
 }

@@ -40,17 +40,17 @@ namespace Jaws.Data
         /// <summary>
         /// The ground temperature in Kelvin
         /// </summary>
-        public Single Temperature { get { return this.Layers[0].Temperature; } }
+        public Single Temperature { get { return this.GroundLayer.Temperature; } }
 
         /// <summary>
         /// The ground Humidity in Saturation percentage
         /// </summary>
-        public Single Humidity { get { return this.Layers[0].Humidity; } } 
+        public Single Humidity { get { return this.GroundLayer.Humidity; } } 
 
         /// <summary>
         /// The ground Airpressure in hectoPascal (hPa/millibar)
         /// </summary>
-        public Single Pressure { get { return this.Layers[0].Pressure; } }
+        public Single Pressure { get { return this.GroundLayer.Pressure; } }
 
         /// <summary>
         /// The area of this air column
@@ -60,7 +60,12 @@ namespace Jaws.Data
         /// <summary>
         /// The ground precipitation (Weather by Water Vapour)
         /// </summary>
-        public PrecipitationType Precipitation { get { return this.Layers[0].Precipitation; } }
+        public PrecipitationType Precipitation { get { return this.GroundLayer.Precipitation; } }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public WeatherLayer GroundLayer { get { return this.Layers[0];  } }
 
         /// <summary>
         /// Constructor
@@ -151,16 +156,17 @@ namespace Jaws.Data
         }
 
         /// <summary>
-        /// 
+        /// Checks if this node is equal to another node
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">the other node</param>
+        /// <returns>true if equal</returns>
         public override bool Equals(object obj)
         {
             var that = obj as WeatherNode;
             if (that == null)
                 return false;
 
+            // Check if layers are equal
             var that_enumerator = that.GetEnumerator();
             var that_has = that_enumerator.MoveNext();
             foreach (var layer in this)
@@ -175,16 +181,18 @@ namespace Jaws.Data
             if (that_has)
                 return false;
 
+            // Check properties
             return this.Area == that.Area;
         }
 
         /// <summary>
-        /// 
+        /// Gets the hashcode for this weathernode
         /// </summary>
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return (this.Area.GetHashCode() * 127) ^ 
+                this.Layers.Sum(layer => layer.GetHashCode());
         }
     }
 }
