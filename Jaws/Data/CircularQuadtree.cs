@@ -9,14 +9,14 @@ namespace Jaws.Data
     /// Stores nodes on a planetary quadtree
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class CircularQuadtree<T> : IEnumerable<T> where T: IQuadNode
+    public class CircularQuadTree<T> : IEnumerable<T> where T: IQuadNode
     {
         protected Dictionary<T, CircularQuadNode> nodes;
 
         /// <summary>
         /// Creates a new CircularQuadTree (3d representation)
         /// </summary>
-        public CircularQuadtree(T face1, T face2, T face3, T face4, T face5, T face6)
+        public CircularQuadTree(T face1, T face2, T face3, T face4, T face5, T face6)
         {
             var f1 = new CircularQuadNode();
             var f2 = new CircularQuadNode();
