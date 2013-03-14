@@ -32,7 +32,7 @@ namespace Jaws.Data
     /// </summary>
     public class WeatherNode : IQuadNode, ICloneable, IEnumerable<WeatherLayer>
     {
-        public const Single GroundLayerHeight = 2f;
+        public const Single GroundLayerHeight = 7f;
 
         /// <summary>
         /// Layers with weather in this air column
@@ -91,10 +91,7 @@ namespace Jaws.Data
 
             // Ground Layer
             node.Layers.Add(WeatherLayer.Generate(GroundLayerHeight, temperature, humidity, pressure, precipitation));
-
-            // TODO top layers
-            // which are derived from ground layer
-
+            
             return node;
         }
 
