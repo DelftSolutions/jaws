@@ -70,78 +70,68 @@ namespace Jaws.Data
             nodes.Add(f6.Value, f6);
         }
 
-        public IEnumerable<T> GetNeighboursUp(T node)
-        {
-            var parent = nodes[node];
-            return GetBottomNodes(parent.NeighbourUp).Select((n) => n.Value).Where((n) => n != null);
-        }
-
-        public IEnumerable<T> GetNeighboursRight(T node)
-        {
-            var parent = nodes[node];
-            return GetRightNodes(parent.NeighbourRight).Select((n) => n.Value).Where((n) => n != null);
-        }
-
-        public IEnumerable<T> GetNeighboursDown(T node)
-        {
-            var parent = nodes[node];
-            return GetBottomNodes(parent.NeighbourDown).Select((n) => n.Value).Where((n) => n != null);
-        }
-
-        public IEnumerable<T> GetNeighboursLeft(T node)
-        {
-            var parent = nodes[node];
-            return GetLeftNodes(parent.NeighbourLeft).Select((n) => n.Value).Where((n) => n != null);
-        }
-
-        protected IEnumerable<CircularQuadNode> GetLeftNodes(CircularQuadNode node)
+        protected IEnumerable<CircularQuadNode> GetSide(CircularQuadNode node, int x, int y)
         {
             if (node == null)
                 return new CircularQuadNode[] { };
 
+            int x1 = (x + 1) / 2;
+            int y1 = (y + 1) / 2;
+
+            int x2 = Math.Abs(x1 + y);
+            int y2 = Math.Abs(y1 + x);
+
             return new CircularQuadNode[] { node }
-                .Concat(GetLeftNodes(node.ChildTopLeft))
-                .Concat(GetLeftNodes(node.ChildBottomLeft));
+                .Concat(GetSide(node.Children[x1, y1], x, y))
+                .Concat(GetSide(node.Children[x2, y2], x, y));
         }
 
-        protected IEnumerable<CircularQuadNode> GetRightNodes(CircularQuadNode node)
+
+        public IEnumerable<T> GetNeighbours(T node, int x, int y)
         {
-            if (node == null)
-                return new CircularQuadNode[] { };
-
-            return new CircularQuadNode[] { node }
-                .Concat(GetRightNodes(node.ChildTopRight))
-                .Concat(GetRightNodes(node.ChildBottomRight));
-        }
-
-        protected IEnumerable<CircularQuadNode> GetTopNodes(CircularQuadNode node)
-        {
-            if (node == null)
-                return new CircularQuadNode[] { };
-
-            return new CircularQuadNode[] { node }
-                .Concat(GetTopNodes(node.ChildTopLeft))
-                .Concat(GetTopNodes(node.ChildTopRight));
-        }
-
-        protected IEnumerable<CircularQuadNode> GetBottomNodes(CircularQuadNode node)
-        {
-            if (node == null)
-                return new CircularQuadNode[] { };
-
-            return new CircularQuadNode[] { node }
-                .Concat(GetBottomNodes(node.ChildBottomLeft))
-                .Concat(GetBottomNodes(node.ChildBottomRight));
+            var parent = nodes[node];
+            return GetSide(parent, x, y).Select((n) => n.Value).Where((n) => n != null);
         }
 
         /// <summary>
         /// Splits a node in four new nodes
         /// </summary>
         /// <param name="node">The node to split</param>
-        public void Split(T node)
+        public IQuadNode[] Split(T node)
         {
             var parent = nodes[node];
             int newdepth = parent.Depth + 1;
+            
+            //Remove old value
+            parent.Value = default(T);
+            nodes.Remove(node);
+
+            var newnodes = node.Split();
+
+            //Create new nodes
+            for(int i = 0; i <= 1; i++)
+                for (int j = 0; j <= 1; j++)
+                {
+                    int x = i * 2 - 1;
+                    int y = j * 2 - 1;
+
+                    T val = (T)newnodes[j * 2 + i];
+                    var n = new CircularQuadNode()
+                    {
+                        Depth = parent.Depth + 1,
+                        Parent = parent,
+                        Value = val,
+                    };
+                    parent.Children[i, j] = n;
+                    nodes.Add(val, n);
+
+                    
+
+                    //Fix references to me
+                    
+                }
+
+            return newnodes;
         }
 
         public IEnumerable<T> GetArea(T child, int depth)
@@ -171,11 +161,12 @@ namespace Jaws.Data
             if (node == null)
                 return new CircularQuadNode[] { };
 
-            return new CircularQuadNode[] { node }
-                .Concat(GetChildren(node.ChildTopRight))
-                .Concat(GetChildren(node.ChildBottomRight))
-                .Concat(GetChildren(node.ChildBottomLeft))
-                .Concat(GetChildren(node.ChildTopLeft));
+            var res = new CircularQuadNode[] { node };
+            for(int x = 0; x <= 1; x++)
+                for(int y = 0; y <= 1; y++)
+                    res.Concat(GetChildren(node.Children[x,y]));
+
+            return res;
         }
 
         /// <summary>
@@ -191,17 +182,17 @@ namespace Jaws.Data
             var deleted = GetChildren(parent).Skip(1);
 
             //Remove all references to soon to be deleted nodes
-            var leftNeighbours = GetRightNodes(parent.NeighbourLeft).Skip(1);
-            leftNeighbours.AsParallel().ForAll((n) => ReplaceRightReference(n, deleted, parent));
+            //var leftNeighbours = GetRightNodes(parent.NeighbourLeft).Skip(1);
+            //leftNeighbours.AsParallel().ForAll((n) => ReplaceRightReference(n, deleted, parent));
 
-            var rightNeighbours = GetLeftNodes(parent.NeighbourRight).Skip(1);
-            rightNeighbours.AsParallel().ForAll((n) => ReplaceLeftReference(n, deleted, parent));
+            //var rightNeighbours = GetLeftNodes(parent.NeighbourRight).Skip(1);
+            //rightNeighbours.AsParallel().ForAll((n) => ReplaceLeftReference(n, deleted, parent));
 
-            var topNeighbours = GetBottomNodes(parent.NeighbourUp).Skip(1);
-            topNeighbours.AsParallel().ForAll((n) => ReplaceDownReference(n, deleted, parent));
+            //var topNeighbours = GetBottomNodes(parent.NeighbourUp).Skip(1);
+            //topNeighbours.AsParallel().ForAll((n) => ReplaceDownReference(n, deleted, parent));
 
-            var bottomNeighbours = GetTopNodes(parent.NeighbourDown).Skip(1);
-            bottomNeighbours.AsParallel().ForAll((n) => ReplaceUpReference(n, deleted, parent));
+            //var bottomNeighbours = GetTopNodes(parent.NeighbourDown).Skip(1);
+            //bottomNeighbours.AsParallel().ForAll((n) => ReplaceUpReference(n, deleted, parent));
 
             //Remove children
             parent.ChildBottomLeft = null;
@@ -211,30 +202,10 @@ namespace Jaws.Data
 
             foreach (var child in deleted)
                 nodes.Remove(child.Value);
-        }
 
-        protected void ReplaceLeftReference(CircularQuadNode node, IEnumerable<CircularQuadNode> subjects, CircularQuadNode replacement)
-        {
-            if (subjects.Where((s) => node.NeighbourLeft == s).Any())
-                node.NeighbourLeft = replacement;
-        }
-
-        protected void ReplaceDownReference(CircularQuadNode node, IEnumerable<CircularQuadNode> subjects, CircularQuadNode replacement)
-        {
-            if (subjects.Where((s) => node.NeighbourDown == s).Any())
-                node.NeighbourDown = replacement;
-        }
-
-        protected void ReplaceRightReference(CircularQuadNode node, IEnumerable<CircularQuadNode> subjects, CircularQuadNode replacement)
-        {
-            if (subjects.Where((s) => node.NeighbourRight == s).Any())
-                node.NeighbourRight = replacement;
-        }
-
-        protected void ReplaceUpReference(CircularQuadNode node, IEnumerable<CircularQuadNode> subjects, CircularQuadNode replacement)
-        {
-            if (subjects.Where((s) => node.NeighbourUp == s).Any())
-                node.NeighbourUp = replacement;
+            //Add replacement
+            parent.Value = replacement;
+            nodes.Add(replacement, parent);
         }
 
         /// <summary>
@@ -259,27 +230,38 @@ namespace Jaws.Data
 
         protected class CircularQuadNode
         {
+            public CircularQuadNode()
+            {
+                Depth = 0;
+                Neighbours = new CircularQuadNode[2, 2];
+                Children = new CircularQuadNode[2, 2];
+            }
+
             public CircularQuadNode Parent { get; set; }
-
             public int Depth { get; set; }
-
-            public CircularQuadNode NeighbourUp { get; set; }
-            public CircularQuadNode NeighbourRight { get; set; }
-            public CircularQuadNode NeighbourDown { get; set; }
-            public CircularQuadNode NeighbourLeft { get; set; }
-
+            public CircularQuadNode[,] Neighbours { get; protected set; }
             public T Value { get; set; }
+            public CircularQuadNode[,] Children { get; protected set; }
 
-            public CircularQuadNode ChildTopLeft { get; set; }
-            public CircularQuadNode ChildTopRight { get; set; }
-            public CircularQuadNode ChildBottomRight { get; set; }
-            public CircularQuadNode ChildBottomLeft { get; set; }
+            public CircularQuadNode ChildTopLeft { set { Children[0, 0] = value; } }
+            public CircularQuadNode ChildTopRight { set { Children[1, 0] = value; } }
+            public CircularQuadNode ChildBottomLeft { set { Children[0, 1] = value; } }
+            public CircularQuadNode ChildBottomRight { set { Children[1, 1] = value; } }
+
+            public CircularQuadNode NeighbourUp { set { Neighbours[0, 0] = value; } }
+            public CircularQuadNode NeighbourRight { set { Neighbours[1, 0] = value; } }
+            public CircularQuadNode NeighbourDown { set { Neighbours[0, 1] = value; } }
+            public CircularQuadNode NeighbourLeft { set { Neighbours[1, 1] = value; } }
 
             public bool IsLeaf
             {
                 get
                 {
-                    return ChildTopLeft == null && ChildTopRight == null && ChildBottomRight == null && ChildBottomLeft == null;
+                    for (int x = 0; x <= 1; x++)
+                        for (int y = 0; y <= 1; y++)
+                            if (Children[x, y] != null)
+                                return false;
+                    return true;
                 }
             }
         }

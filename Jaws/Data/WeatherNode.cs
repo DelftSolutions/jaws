@@ -73,9 +73,9 @@ namespace Jaws.Data
         /// Splits this node in four smaller nodes
         /// </summary>
         /// <returns></returns>
-        public Tuple<IQuadNode, IQuadNode, IQuadNode, IQuadNode> Split()
+        public IQuadNode[] Split()
         {
-            return new Tuple<IQuadNode, IQuadNode, IQuadNode, IQuadNode>(DeepClone(), DeepClone(), DeepClone(), DeepClone());
+            return new IQuadNode[] { DeepClone(), DeepClone(), DeepClone(), DeepClone() };
         }
 
         /// <summary>
