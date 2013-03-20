@@ -70,6 +70,34 @@ namespace Jaws.Data
             nodes.Add(f6.Value, f6);
         }
 
+        /// <summary>
+        /// Creates a flat circularquadtree (2 faces instead of 6)
+        /// </summary>
+        /// <param name="f1"></param>
+        /// <param name="f2"></param>
+        public CircularQuadTree(T face1, T face2)
+        {
+            nodes = new Dictionary<T, CircularQuadNode>();
+
+            var f1 = new CircularQuadNode();
+            f1.Value = face1;
+            var f2 = new CircularQuadNode();
+            f2.Value = face2;
+
+            f1.NeighbourUp = f2;
+            f1.NeighbourRight = f2;
+            f1.NeighbourDown = f2;
+            f1.NeighbourLeft = f2;
+
+            f2.NeighbourUp = f1;
+            f2.NeighbourRight = f1;
+            f2.NeighbourDown = f1;
+            f2.NeighbourLeft = f1;
+
+            nodes.Add(face1, f1);
+            nodes.Add(face2, f2);
+        }
+
         protected IEnumerable<CircularQuadNode> GetSide(CircularQuadNode node, int x, int y)
         {
             if (node == null)
@@ -95,7 +123,29 @@ namespace Jaws.Data
         public IEnumerable<T> GetNeighbours(T node, int x, int y)
         {
             var parent = nodes[node];
-            return GetSide(parent, x, y).Select((n) => n.Value).Where((n) => n != null);
+
+            return GetNeighbourNodes(parent, x, y).Select((n) => n.Value).Where((n) => n != null);
+        }
+
+        protected IEnumerable<CircularQuadNode> GetNeighbourNodes(CircularQuadNode node, int x, int y)
+        {
+            var neighbour = node[x, y];
+            IEnumerable<CircularQuadNode> result = new CircularQuadNode[] { };
+            IEnumerable<CircularQuadNode> parents = new CircularQuadNode[] { };
+            CircularQuadNode cur = neighbour;
+            while (cur != null)
+            {
+                parents = parents.Concat(new CircularQuadNode[] { cur });
+                cur = cur.Parent;
+            }
+
+            var directions = new int[][] { new int[] { 1, 0 }, new int[] { 0, -1 }, new int[] { -1, 0 }, new int[] { 0, 1 } };
+            foreach(var direction in directions)
+            {
+                if(parents.Contains(neighbour[direction[0], direction[1]]))
+                    result = result.Concat(GetSide(neighbour, direction[0], direction[1]));
+            }
+            return result;
         }
 
         /// <summary>
@@ -113,6 +163,8 @@ namespace Jaws.Data
 
             var newnodes = node.Split();
 
+            var temp = new CircularQuadNode[2, 2];
+
             //Create new nodes
             for(int i = 0; i <= 1; i++)
                 for (int j = 0; j <= 1; j++)
@@ -129,6 +181,7 @@ namespace Jaws.Data
                     };
                     parent[x, y] = n;
                     nodes.Add(val, n);
+                    temp[i, j] = n;
 
                     var masks = new int[][] { new int[] { 1, 0 }, new int[] { 0, 1 } };
                     foreach (var mask in masks)
@@ -140,9 +193,20 @@ namespace Jaws.Data
                         var neighbour = parent[neighx, neighy];
                         //Get correct child
                         neighbour = neighbour[x - 2 * neighx, y - 2 * neighy];
-                        n[neighx, neighy] = neighbour;
-                        GetSide(
+                        n[neighx, neighy] = neighbour ?? parent[neighx, neighy];
+                        GetSide(neighbour, -neighx, -neighy).AsParallel().ForAll((s) => s[-neighx, -neighy] = n);
                     }
+                }
+
+            // Set neighbours
+            for(int i = 0; i <= 1; i++)
+                for (int j = 0; j <= 1; j++)
+                {
+                    int x = i * 2 - 1;
+                    int y = j * 2 - 1;
+                    var n = temp[i, j];
+                    n[-x, 0] = temp[1 - i, j];
+                    n[0, -y] = temp[i, 1 - j];
                 }
 
             return newnodes;
@@ -175,13 +239,13 @@ namespace Jaws.Data
             if (node == null)
                 return new CircularQuadNode[] { };
 
-            var res = new CircularQuadNode[] { node };
+            IEnumerable<CircularQuadNode> res = new CircularQuadNode[] { node };
             for(int i = 0; i <= 1; i++)
                 for (int j = 0; j <= 1; j++)
                 {
                     int x = i * 2 - 1;
                     int y = j * 2 - 1;
-                    res.Concat(GetChildren(node[x, y]));
+                    res = res.Concat(GetChildren(node[x, y]));
                 }
 
             return res;
@@ -204,11 +268,23 @@ namespace Jaws.Data
             //Remove all references to soon to be deleted nodes
             foreach (var direction in directions)
             {
-                var neighbour = parent[direction[0], direction[1]];
-                int x = -direction[0];
-                int y = -direction[1];
-                var sideNodes = GetSide(neighbour, x, y);
-                sideNodes.AsParallel().ForAll((n) => n[x, y] = parent);
+                var sideNodes = GetNeighbourNodes(parent, direction[0], direction[1]);
+                //var neighbour = parent[direction[0], direction[1]];
+                //int x = -direction[0];
+                //int y = -direction[1];
+                //var sideNodes = GetSide(neighbour, x, y);
+                sideNodes.AsParallel().ForAll((n) =>
+                {
+                    foreach (var neighbourdirection in directions)
+                    {
+                        foreach(var d in deleted)
+                            if (n[neighbourdirection[0], neighbourdirection[1]] == d)
+                            {
+                                n[neighbourdirection[0], neighbourdirection[1]] = parent;
+                                break;
+                            }
+                    }
+                });
             }
 
             //Remove children
@@ -279,6 +355,11 @@ namespace Jaws.Data
             public CircularQuadNode NeighbourRight { set { this[1, 0] = value; } }
             public CircularQuadNode NeighbourDown { set { this[0, -1] = value; } }
             public CircularQuadNode NeighbourLeft { set { this[-1, 0] = value; } }
+
+            public override string ToString()
+            {
+                return "CircularQuadNode(){ " + Value.ToString() + " }";
+            }
 
             public bool IsLeaf
             {
