@@ -7,6 +7,6 @@ namespace Jaws.Data
 {
     public interface IQuadNode
     {
-        Tuple<IQuadNode, IQuadNode, IQuadNode, IQuadNode> Split();
+        IQuadNode[] Split();
     }
 }

@@ -79,24 +79,24 @@ namespace Test
             var splitted = parent.Split();
 
             // Actually split
-            Assert.AreNotSame(parent, splitted.Item1, "splitted object has the same reference as parent");
-            Assert.AreNotSame(parent, splitted.Item2, "splitted object has the same reference as parent");
-            Assert.AreNotSame(parent, splitted.Item3, "splitted object has the same reference as parent");
-            Assert.AreNotSame(parent, splitted.Item4, "splitted object has the same reference as parent");
+            Assert.AreNotSame(parent, splitted[0], "splitted object has the same reference as parent");
+            Assert.AreNotSame(parent, splitted[1], "splitted object has the same reference as parent");
+            Assert.AreNotSame(parent, splitted[2], "splitted object has the same reference as parent");
+            Assert.AreNotSame(parent, splitted[3], "splitted object has the same reference as parent");
 
             // Cloned objects
-            Assert.AreNotSame(splitted.Item2, splitted.Item1, "splitted object has same reference as other splitted object");
-            Assert.AreNotSame(splitted.Item3, splitted.Item1, "splitted object has same reference as other splitted object");
-            Assert.AreNotSame(splitted.Item4, splitted.Item1, "splitted object has same reference as other splitted object");
-            Assert.AreNotSame(splitted.Item3, splitted.Item2, "splitted object has same reference as other splitted object");
-            Assert.AreNotSame(splitted.Item4, splitted.Item2, "splitted object has same reference as other splitted object");
-            Assert.AreNotSame(splitted.Item4, splitted.Item3, "splitted object has same reference as other splitted object");
+            Assert.AreNotSame(splitted[1], splitted[0], "splitted object has same reference as other splitted object");
+            Assert.AreNotSame(splitted[2], splitted[0], "splitted object has same reference as other splitted object");
+            Assert.AreNotSame(splitted[3], splitted[0], "splitted object has same reference as other splitted object");
+            Assert.AreNotSame(splitted[2], splitted[1], "splitted object has same reference as other splitted object");
+            Assert.AreNotSame(splitted[3], splitted[1], "splitted object has same reference as other splitted object");
+            Assert.AreNotSame(splitted[3], splitted[3], "splitted object has same reference as other splitted object");
 
             // Cloned values?
-            var topleft = splitted.Item1 as WeatherNode;
-            var topright = splitted.Item2 as WeatherNode;
-            var bottomright = splitted.Item3 as WeatherNode;
-            var bottomleft = splitted.Item4 as WeatherNode;
+            var topleft = splitted[0] as WeatherNode;
+            var topright = splitted[1] as WeatherNode;
+            var bottomright = splitted[2] as WeatherNode;
+            var bottomleft = splitted[4] as WeatherNode;
 
             Assert.AreEqual(topleft.Area, parent.Area / 4, "area is not splitted in 4 equal areas");
             Assert.AreEqual(topright.Area, parent.Area / 4, "area is not splitted in 4 equal areas");

@@ -99,7 +99,7 @@ namespace Jaws.Data
         /// Splits this node in four smaller nodes
         /// </summary>
         /// <returns></returns>
-        public Tuple<IQuadNode, IQuadNode, IQuadNode, IQuadNode> Split()
+        public IQuadNode[] Split()
         {
             var topleft = DeepClone();
             var topright = DeepClone();
@@ -111,7 +111,7 @@ namespace Jaws.Data
             bottomright.Area = this.Area / 4;
             bottomleft.Area = this.Area / 4;
 
-            return new Tuple<IQuadNode, IQuadNode, IQuadNode, IQuadNode>(topleft, topright, bottomright, bottomleft);
+            return new IQuadNode[] { topleft, topright, bottomright, bottomleft };
         }
 
         /// <summary>
