@@ -90,20 +90,20 @@ namespace Test
             Assert.AreNotSame(splitted[3], splitted[0], "splitted object has same reference as other splitted object");
             Assert.AreNotSame(splitted[2], splitted[1], "splitted object has same reference as other splitted object");
             Assert.AreNotSame(splitted[3], splitted[1], "splitted object has same reference as other splitted object");
-            Assert.AreNotSame(splitted[3], splitted[3], "splitted object has same reference as other splitted object");
+            Assert.AreNotSame(splitted[3], splitted[2], "splitted object has same reference as other splitted object");
 
             // Cloned values?
             var topleft = splitted[0] as WeatherNode;
             var topright = splitted[1] as WeatherNode;
             var bottomright = splitted[2] as WeatherNode;
-            var bottomleft = splitted[4] as WeatherNode;
+            var bottomleft = splitted[3] as WeatherNode;
 
             Assert.AreEqual(topleft.Area, parent.Area / 4, "area is not splitted in 4 equal areas");
             Assert.AreEqual(topright.Area, parent.Area / 4, "area is not splitted in 4 equal areas");
             Assert.AreEqual(bottomright.Area, parent.Area / 4, "area is not splitted in 4 equal areas");
             Assert.AreEqual(bottomleft.Area, parent.Area / 4, "area is not splitted in 4 equal areas");
 
-            // Rest should be testdd in Unittest of WeatherLayer
+            // Rest should be tested in Unittest of WeatherLayer
         }
 
         /// <summary>

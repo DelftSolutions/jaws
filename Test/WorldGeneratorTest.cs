@@ -20,7 +20,7 @@ namespace Test
             var enumerator = world.GetEnumerator();
             while (enumerator.MoveNext())
                 count++;
-            Assert.AreEqual(6, count);
+            Assert.AreEqual(1, count);
         }
     }
 }
