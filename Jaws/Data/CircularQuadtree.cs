@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 
@@ -35,13 +36,24 @@ namespace Jaws.Data
         protected IEnumerable<CircularQuadNode> GetSide(CircularQuadNode node, int x, int y)
         {
             if (node == null)
-                return new CircularQuadNode[] { };
+                yield break;
 
             var directions = GetSideDirections(x, y);
+            Queue<CircularQuadNode> q = new Queue<CircularQuadNode>();
+            q.Enqueue(node);
 
-            return new CircularQuadNode[] { node }
-                .Concat(GetSide(node[directions[0][0], directions[0][1]], x, y))
-                .Concat(GetSide(node[directions[1][0], directions[1][1]], x, y));
+            while (q.Count > 0)
+            {
+                var n = q.Dequeue();
+
+                if (n == null)
+                    continue;
+
+                foreach (var direction in directions)
+                    q.Enqueue(n[direction[0], direction[1]]);
+
+                yield return n;
+            }
         }
 
         protected int[][] GetSideDirections(int x, int y)
@@ -156,18 +168,27 @@ namespace Jaws.Data
         protected IEnumerable<CircularQuadNode> GetChildren(CircularQuadNode node)
         {
             if (node == null)
-                return new CircularQuadNode[] { };
+                yield break;
 
-            IEnumerable<CircularQuadNode> res = new CircularQuadNode[] { node };
-            for(int i = 0; i <= 1; i++)
-                for (int j = 0; j <= 1; j++)
-                {
-                    int x = i * 2 - 1;
-                    int y = j * 2 - 1;
-                    res = res.Concat(GetChildren(node[x, y]));
-                }
+            Queue<CircularQuadNode> q = new Queue<CircularQuadNode>();
+            q.Enqueue(node);
 
-            return res;
+            while (q.Count > 0)
+            {
+                var n = q.Dequeue();
+                if (n == null)
+                    continue;
+
+                for (int i = 0; i <= 1; i++)
+                    for (int j = 0; j <= 1; j++)
+                    {
+                        int x = i * 2 - 1;
+                        int y = j * 2 - 1;
+                        q.Enqueue(n[x, y]);
+                    }
+
+                yield return n;
+            }
         }
 
         /// <summary>
@@ -187,23 +208,16 @@ namespace Jaws.Data
             //Remove all references to soon to be deleted nodes
             foreach (var direction in directions)
             {
-                var sideNodes = GetNeighbourNodes(parent, direction[0], direction[1]);
-                //var neighbour = parent[direction[0], direction[1]];
-                //int x = -direction[0];
-                //int y = -direction[1];
-                //var sideNodes = GetSide(neighbour, x, y);
-                sideNodes.AsParallel().ForAll((n) =>
-                {
-                    foreach (var neighbourdirection in directions)
-                    {
-                        foreach(var d in deleted)
-                            if (n[neighbourdirection[0], neighbourdirection[1]] == d)
-                            {
-                                n[neighbourdirection[0], neighbourdirection[1]] = parent;
-                                break;
-                            }
-                    }
-                });
+                int x = direction[0];
+                int y = direction[1];
+                var neighbour = parent[x, y];
+
+                if (neighbour.Depth > parent.Depth)
+                    continue;
+
+                var sideNodes = GetNeighbourNodes(parent, x, y);
+                foreach (var edge in sideNodes)
+                    edge[-x, -y] = parent;
             }
 
             //Remove children

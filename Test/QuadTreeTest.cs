@@ -37,6 +37,40 @@ namespace Test
         }
 
         [TestMethod]
+        public void SplitReplaceTest()
+        {
+            var start = new TestNode();
+            var tree = new CircularQuadTree<TestNode>(start);
+            int times = 200;
+            TestNode[] nodes = new TestNode[times];
+            nodes[0] = start;
+            for (int i = 1; i < times; i++)
+            {
+                var res = tree.Split(nodes[i - 1]);
+                nodes[i] = (TestNode)res[i % 4];
+            }
+
+            Assert.AreEqual(3 * (times - 1) + 1, tree.GetArea(nodes[times - 1], 0).Count(), "Tree should contain a different amount of children after these splits");
+
+            for (int i = times - 1; i > 0; i--)
+            {
+                tree.Replace(nodes[i], i - 1, nodes[i - 1]);
+                
+            }
+            Assert.AreEqual(1, tree.GetArea(nodes[0], 0).Count(), "Tree should contain a different amount of children after these merges");
+        }
+
+        [TestMethod]
+        public void GetAreaTest()
+        {
+            var start = new TestNode("start");
+            var tree = new CircularQuadTree<TestNode>(start);
+            Assert.AreEqual(1, tree.GetArea(start, 0).Count(), "There should be one element in this collection");
+            var res = tree.Split(start);
+            Assert.AreEqual(4, tree.GetArea((TestNode)res[0], 0).Count(), "After a split this collection should contain 4 elements");
+        }
+
+        [TestMethod]
         public void GetNeighboursTest()
         {
             var start = new TestNode();
@@ -88,7 +122,10 @@ namespace Test
 
             IQuadNode[] IQuadNode.Split()
             {
-                return new IQuadNode[] { new TestNode(Name + "-topleft"), new TestNode(Name + "-topright"), new TestNode(Name + "-bottomleft"), new TestNode(Name + "-bottomright") };
+                if (Name != null)
+                    return new IQuadNode[] { new TestNode(Name + "-topleft"), new TestNode(Name + "-topright"), new TestNode(Name + "-bottomleft"), new TestNode(Name + "-bottomright") };
+                else
+                    return new IQuadNode[] { new TestNode(), new TestNode(), new TestNode(), new TestNode() };
             }
         }
     }
