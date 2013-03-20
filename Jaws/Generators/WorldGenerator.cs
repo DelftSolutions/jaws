@@ -15,11 +15,6 @@ namespace Jaws.Generators
         public static CircularQuadTree<WeatherNode> Generate()
         {
             return new CircularQuadTree<WeatherNode>( 
-                WeatherNode.Generate( 0, 0, 1035 ),
-                WeatherNode.Generate( 0, 0, 1035 ),
-                WeatherNode.Generate( 0, 0, 1035 ),
-                WeatherNode.Generate( 0, 0, 1035 ),
-                WeatherNode.Generate( 0, 0, 1035 ),
                 WeatherNode.Generate( 0, 0, 1035 )
             );
         } 

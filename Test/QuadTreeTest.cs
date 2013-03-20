@@ -9,115 +9,63 @@ namespace Test
     [TestClass]
     public class QuadTreeTest
     {
-        [TestMethod]
-        public void InitTest()
-        {
-            var tree = new CircularQuadTree<TestNode>(
-                new TestNode(),
-                new TestNode(),
-                new TestNode(),
-                new TestNode(),
-                new TestNode(),
-                new TestNode());
-        }
 
         [TestMethod]
         public void OrientationTest()
         {
             var start = new TestNode();
-            var tree = new CircularQuadTree<TestNode>(
-                start,
-                new TestNode(),
-                new TestNode(),
-                new TestNode(),
-                new TestNode(),
-                new TestNode());
+            var tree = new CircularQuadTree<TestNode>(start);
 
             var current = start;
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 1; i++)
                 current = tree.GetNeighbours(current, 0, 1).First();
 
             Assert.AreEqual(start, current);
-        }
-
-        [TestMethod]
-        public void FlatSplitTest()
-        {
-            var start = new TestNode("start");
-            var split = new TestNode("split");
-            var tree = new CircularQuadTree<TestNode>(start, split);
-            tree.Split(split);
-
-            var current = start;
-            for (int i = 0; i < 3; i++)
-                current = tree.GetNeighbours(current, 0, 1).First();
-            Assert.AreEqual(current, start);
         }
 
         [TestMethod]
         public void SplitTest()
         {
             var start = new TestNode("start");
-            var split = new TestNode("split");
-            var tree = new CircularQuadTree<TestNode>(
-                start,
-                split,
-                new TestNode(),
-                new TestNode(),
-                new TestNode(),
-                new TestNode());
-            tree.Split(split);
+            var tree = new CircularQuadTree<TestNode>(start);
+            var res = tree.Split(start);
 
-            var current = start;
-            for (int i = 0; i < 7; i++)
+            var current = (TestNode)res[0];
+            for (int i = 0; i < 2; i++)
                 current = tree.GetNeighbours(current, 0, 1).First();
-
-           Assert.AreEqual(start, current);
+            Assert.AreEqual((TestNode)res[0], current);
         }
 
         [TestMethod]
         public void GetNeighboursTest()
         {
             var start = new TestNode();
-            var tree = new CircularQuadTree<TestNode>(
-                start,
-                new TestNode(),
-                new TestNode(),
-                new TestNode(),
-                new TestNode(),
-                new TestNode());
+            var tree = new CircularQuadTree<TestNode>(start);
 
-            Assert.AreNotEqual(start, tree.GetNeighbours(start, 1, 0).First());
+            Assert.AreEqual(start, tree.GetNeighbours(start, 1, 0).First());
         }
 
         [TestMethod]
         public void ReplaceTest()
         {
             var start = new TestNode("start");
-            var split = new TestNode("split");
-            var tree = new CircularQuadTree<TestNode>(
-                start,
-                split,
-                new TestNode("1"),
-                new TestNode("2"),
-                new TestNode("3"),
-                new TestNode("4"));
+            var tree = new CircularQuadTree<TestNode>(start);
             var current = start;
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 1; i++)
                 current = tree.GetNeighbours(current, 0, 1).First();
             Assert.AreEqual(start, current);
 
-            var newnodes = tree.Split(split);
+            var newnodes = tree.Split(start);
 
-            current = start;
-            for (int i = 0; i < 7; i++)
+            current = (TestNode)newnodes[0];
+            for (int i = 0; i < 2; i++)
                 current = tree.GetNeighbours(current, 0, 1).First();
-            Assert.AreEqual(start, current);
+            Assert.AreEqual((TestNode)newnodes[0], current);
 
-            tree.Replace((TestNode)newnodes[0], 0, split);
+            tree.Replace((TestNode)newnodes[0], 0, start);
 
             current = start;
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 1; i++)
                 current = tree.GetNeighbours(current, 0, 1).First();
 
             Assert.AreEqual(start, current);

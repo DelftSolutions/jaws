@@ -14,88 +14,22 @@ namespace Jaws.Data
         protected Dictionary<T, CircularQuadNode> nodes;
 
         /// <summary>
-        /// Creates a new CircularQuadTree (3d representation)
-        /// </summary>
-        public CircularQuadTree(T face1, T face2, T face3, T face4, T face5, T face6)
-        {
-            nodes = new Dictionary<T, CircularQuadNode>();
-
-            var f1 = new CircularQuadNode();
-            var f2 = new CircularQuadNode();
-            var f3 = new CircularQuadNode();
-            var f4 = new CircularQuadNode();
-            var f5 = new CircularQuadNode();
-            var f6 = new CircularQuadNode();
-
-            f1.Value = face1;
-            f2.Value = face2;
-            f3.Value = face3;
-            f4.Value = face4;
-            f5.Value = face5;
-            f6.Value = face6;
-
-            f1.NeighbourUp = f2;
-            f2.NeighbourUp = f3;
-            f3.NeighbourUp = f4;
-            f4.NeighbourUp = f5;
-            f5.NeighbourUp = f6;
-            f6.NeighbourUp = f1;
-
-            f1.NeighbourDown = f4;
-            f2.NeighbourDown = f6;
-            f3.NeighbourDown = f2;
-            f4.NeighbourDown = f1;
-            f5.NeighbourDown = f3;
-            f6.NeighbourDown = f5;
-
-            f1.NeighbourLeft = f6;
-            f2.NeighbourLeft = f5;
-            f3.NeighbourLeft = f5;
-            f4.NeighbourLeft = f3;
-            f5.NeighbourLeft = f2;
-            f6.NeighbourLeft = f2;
-
-            f1.NeighbourRight = f3;
-            f2.NeighbourRight = f1;
-            f3.NeighbourRight = f1;
-            f4.NeighbourRight = f6;
-            f5.NeighbourRight = f4;
-            f6.NeighbourRight = f4;
-
-            nodes.Add(f1.Value, f1);
-            nodes.Add(f2.Value, f2);
-            nodes.Add(f3.Value, f3);
-            nodes.Add(f4.Value, f4);
-            nodes.Add(f5.Value, f5);
-            nodes.Add(f6.Value, f6);
-        }
-
-        /// <summary>
         /// Creates a flat circularquadtree (2 faces instead of 6)
         /// </summary>
         /// <param name="f1"></param>
-        /// <param name="f2"></param>
-        public CircularQuadTree(T face1, T face2)
+        public CircularQuadTree(T face1)
         {
             nodes = new Dictionary<T, CircularQuadNode>();
 
             var f1 = new CircularQuadNode();
             f1.Value = face1;
-            var f2 = new CircularQuadNode();
-            f2.Value = face2;
 
-            f1.NeighbourUp = f2;
-            f1.NeighbourRight = f2;
-            f1.NeighbourDown = f2;
-            f1.NeighbourLeft = f2;
-
-            f2.NeighbourUp = f1;
-            f2.NeighbourRight = f1;
-            f2.NeighbourDown = f1;
-            f2.NeighbourLeft = f1;
+            f1.NeighbourUp = f1;
+            f1.NeighbourRight = f1;
+            f1.NeighbourDown = f1;
+            f1.NeighbourLeft = f1;
 
             nodes.Add(face1, f1);
-            nodes.Add(face2, f2);
         }
 
         protected IEnumerable<CircularQuadNode> GetSide(CircularQuadNode node, int x, int y)
@@ -130,22 +64,7 @@ namespace Jaws.Data
         protected IEnumerable<CircularQuadNode> GetNeighbourNodes(CircularQuadNode node, int x, int y)
         {
             var neighbour = node[x, y];
-            IEnumerable<CircularQuadNode> result = new CircularQuadNode[] { };
-            IEnumerable<CircularQuadNode> parents = new CircularQuadNode[] { };
-            CircularQuadNode cur = neighbour;
-            while (cur != null)
-            {
-                parents = parents.Concat(new CircularQuadNode[] { cur });
-                cur = cur.Parent;
-            }
-
-            var directions = new int[][] { new int[] { 1, 0 }, new int[] { 0, -1 }, new int[] { -1, 0 }, new int[] { 0, 1 } };
-            foreach(var direction in directions)
-            {
-                if(parents.Contains(neighbour[direction[0], direction[1]]))
-                    result = result.Concat(GetSide(neighbour, direction[0], direction[1]));
-            }
-            return result;
+            return GetSide(neighbour, -x, -y);
         }
 
         /// <summary>
