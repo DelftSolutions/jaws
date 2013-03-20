@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jaws.Data;
 using System.Linq;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Test
 {
@@ -58,6 +59,35 @@ namespace Test
                 
             }
             Assert.AreEqual(1, tree.GetArea(nodes[0], 0).Count(), "Tree should contain a different amount of children after these merges");
+        }
+
+        [TestMethod]
+        public void SplitAllTest()
+        {
+            var start = new TestNode("");
+            var tree = new CircularQuadTree<TestNode>(start);
+            Queue<TestNode> q = new Queue<TestNode>();
+            q.Enqueue(start);
+
+            int width = 1;
+            for (int round = 0; round < 4; round++)
+            {
+                for (int i = 0; i < (width * width); i++)
+                {
+                    var s = q.Dequeue();
+                    var childs = tree.Split(s);
+                    foreach (var child in childs)
+                        q.Enqueue((TestNode)child);
+                }
+
+                width *= 2;
+
+                start = q.Peek();
+                var cur = start;
+                for (int i = 0; i < width; i++)
+                    cur = tree.GetNeighbours(cur, 1, 0).First();
+                Assert.AreEqual(start, cur);
+            }
         }
 
         [TestMethod]
