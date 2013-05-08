@@ -1,5 +1,6 @@
 language: c
+
 install:
-  - sudo apt-get install mono-devel mono-gmcs
- script:
-  - xbuild Jaws.sln
+    - sudo apt-get install mono-devel mono-gmcs
+script:
+    - xbuild Jaws.sln
